@@ -1,6 +1,6 @@
 import { Routes, Route, Link } from "react-router-dom";
 import "./App.css";
-import Chat from "./pages/Chat";
+import Chat from "./pages/Chat.tsx";
 
 function Home() {
   return (
@@ -14,13 +14,6 @@ function Home() {
   );
 }
 
-// function Chat() {
-//   return (
-//     <div className="p-8">
-//       <h2 className="text-2xl">Чат (в разработке)</h2>
-//     </div>
-//   );
-// }
 
 function App() {
   
