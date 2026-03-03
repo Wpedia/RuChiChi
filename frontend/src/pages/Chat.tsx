@@ -44,8 +44,7 @@ export default function Chat() {
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-sm h-[calc(100vh-140px)] flex overflow-hidden">
-      {/* Sidebar */}
+    <div className="bg-white rounded-xl shadow-sm h-[calc(100vh-48px)] flex overflow-hidden"> {/* Sidebar */}
       <div className="w-80 border-r flex flex-col">
         <div className="p-3 border-b">
           <div className="relative">

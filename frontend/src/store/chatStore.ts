@@ -109,10 +109,13 @@ export const useChatStore = create<ChatState>((set, get) => ({
   setActiveConversation: (id) => set({ activeConversationId: id }),
 
   sendMessage: (conversationId, content) => {
+    const currentUserId = 'current-user' //снова хардкод, потом из auth
     const newMessage: Message = {
       id: Date.now().toString(),
       conversationId,
-      senderId: "current-user", // Пока захардкожено
+      senderId: currentUserId, 
+      sender: get().conversations.find(c => c.id === conversationId)
+      ?.participants.find(u => u.id === currentUserId),
       content,
       originalLanguage: "ru",
       timestamp: new Date(),
