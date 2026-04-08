@@ -85,7 +85,7 @@ export default function Home() {
         ) : (
           <div className="inline-flex items-center gap-2 bg-green-100 text-green-700 px-6 py-3 rounded-lg">
             <TrendingUp size={20} />
-            <span>С возвращением, {user?.name}! Продолжим обучение?</span>
+            <span>С возвращением, {user?.phoneOrLogin}! Продолжим обучение?</span>
             <Link to="/chat" className="underline font-medium">В чат</Link>
           </div>
         )}

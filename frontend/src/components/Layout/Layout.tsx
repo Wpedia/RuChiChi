@@ -27,6 +27,7 @@ export default function Layout() {
     const location = useLocation()
     const { user, isAuthenticated, logout } = useAuthStore();  
     const isActive = (path: string) => location.pathname === path;
+    
   return (
     <div className="min-h-screen bg-gray-50 flex">
       {/* Sidebar */}
@@ -98,8 +99,8 @@ export default function Layout() {
                   <User size={16} className="text-gray-500" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium truncate">{user?.name}</p>
-                  <p className="text-xs text-gray-500 truncate">@{user?.username}</p>
+                  <p className="text-sm font-medium truncate">{user?.phoneOrLogin}</p>
+                  {/* <p className="text-xs text-gray-500 truncate">@{user?.firstName}</p> */}
                 </div>
                 <button 
                   onClick={logout}
