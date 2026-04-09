@@ -19,14 +19,6 @@ export const useSocket = () => {
       reconnectionAttempts: 5,
     });
 
-    socketRef.current.on('connect', () => {
-      console.log('Connected to chat');
-    });
-
-    socketRef.current.on('disconnect', () => {
-      console.log('Disconnected from chat');
-    });
-
     return () => {
       socketRef.current?.disconnect();
     };
@@ -36,8 +28,20 @@ export const useSocket = () => {
     socketRef.current?.emit('send_message', { receiverId, content });
   }, []);
 
-  const getHistory = useCallback((userId: string) => {
-    socketRef.current?.emit('get_history', { userId });
+  const getHistory = useCallback((userId: string, limit?: number, offset?: number) => {
+    socketRef.current?.emit('get_history', { userId, limit, offset });
+  }, []);
+
+  const startTyping = useCallback((conversationId: string) => {
+    socketRef.current?.emit('typing_start', { conversationId });
+  }, []);
+
+  const stopTyping = useCallback((conversationId: string) => {
+    socketRef.current?.emit('typing_stop', { conversationId });
+  }, []);
+
+  const markAsRead = useCallback((messageId: string) => {
+    socketRef.current?.emit('mark_read', { messageId });
   }, []);
 
   const on = useCallback((event: string, callback: (data: any) => void) => {
@@ -45,5 +49,13 @@ export const useSocket = () => {
     return () => socketRef.current?.off(event, callback);
   }, []);
 
-  return { sendMessage, getHistory, on };
+  return { 
+    sendMessage, 
+    getHistory, 
+    startTyping, 
+    stopTyping, 
+    markAsRead, 
+    on,
+    socket: socketRef.current 
+  };
 };

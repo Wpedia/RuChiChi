@@ -10,6 +10,7 @@ exports.AppModule = void 0;
 const common_1 = require("@nestjs/common");
 const config_1 = require("@nestjs/config");
 const typeorm_1 = require("@nestjs/typeorm");
+const path_1 = require("path");
 const auth_module_1 = require("./auth/auth.module");
 const messages_module_1 = require("./messages/messages.module");
 let AppModule = class AppModule {
@@ -18,16 +19,29 @@ exports.AppModule = AppModule;
 exports.AppModule = AppModule = __decorate([
     (0, common_1.Module)({
         imports: [
-            config_1.ConfigModule.forRoot({ isGlobal: true }),
-            typeorm_1.TypeOrmModule.forRoot({
-                type: 'postgres',
-                host: process.env.DB_HOST || 'localhost',
-                port: parseInt(process.env.DB_PORT || '5432'),
-                username: process.env.DB_USER || 'postgres',
-                password: process.env.DB_PASSWORD || 'postgres',
-                database: process.env.DB_NAME || 'ruchichi',
-                entities: [__dirname + '/**/*.entity{.ts,.js}'],
-                synchronize: true,
+            config_1.ConfigModule.forRoot({
+                isGlobal: true,
+                envFilePath: (0, path_1.join)(__dirname, '..', '.env'),
+            }),
+            typeorm_1.TypeOrmModule.forRootAsync({
+                imports: [config_1.ConfigModule],
+                useFactory: (config) => {
+                    console.log('=== DB CONFIG ===');
+                    console.log('Host:', config.get('DB_HOST'));
+                    console.log('User:', config.get('DB_USER'));
+                    console.log('DB:', config.get('DB_NAME'));
+                    return {
+                        type: 'postgres',
+                        host: config.get('DB_HOST', 'localhost'),
+                        port: parseInt(config.get('DB_PORT', '5432')),
+                        username: config.get('DB_USER', 'postgres'),
+                        password: config.get('DB_PASSWORD', 'postgres'),
+                        database: config.get('DB_NAME', 'chat'),
+                        entities: [(0, path_1.join)(__dirname, '**', '*.entity.{ts,js}')],
+                        synchronize: true,
+                    };
+                },
+                inject: [config_1.ConfigService],
             }),
             auth_module_1.AuthModule,
             messages_module_1.MessagesModule

@@ -1,23 +1,37 @@
 /* eslint-disable prettier/prettier */
 
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { join } from 'path';
 import { AuthModule } from './auth/auth.module';
 import { MessagesModule } from './messages/messages.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true }),
-    TypeOrmModule.forRoot({
-      type: 'postgres',
-      host: process.env.DB_HOST || 'localhost',
-      port: parseInt(process.env.DB_PORT || '5432'),
-      username: process.env.DB_USER || 'postgres',
-      password: process.env.DB_PASSWORD || 'postgres',
-      database: process.env.DB_NAME || 'ruchichi',
-      entities: [__dirname + '/**/*.entity{.ts,.js}'],
-      synchronize: true, // УБРАТЬ В ПРОДЕЕЕ
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: join(__dirname, '..', '.env'), // Явный путь к .env
+    }),
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: (config: ConfigService) => {
+        console.log('=== DB CONFIG ===');
+        console.log('Host:', config.get('DB_HOST'));
+        console.log('User:', config.get('DB_USER'));
+        console.log('DB:', config.get('DB_NAME'));
+        return {
+          type: 'postgres',
+          host: config.get('DB_HOST', 'localhost'),
+          port: parseInt(config.get('DB_PORT', '5432')),
+          username: config.get('DB_USER', 'postgres'),
+          password: config.get('DB_PASSWORD', 'postgres'),
+          database: config.get('DB_NAME', 'chat'),
+          entities: [join(__dirname, '**', '*.entity.{ts,js}')],
+          synchronize: true,
+        };
+      },
+      inject: [ConfigService],
     }),
     AuthModule,
     MessagesModule

@@ -22,9 +22,41 @@ let MessagesService = class MessagesService {
     constructor(messageRepository) {
         this.messageRepository = messageRepository;
     }
+    async updateStatus(messageId, status) {
+        const updateData = { status };
+        if (status === message_entity_1.MessageStatus.READ) {
+            updateData.isRead = true;
+            updateData.readAt = new Date();
+        }
+        await this.messageRepository.update(messageId, updateData);
+    }
+    async markAsRead(messageId) {
+        await this.messageRepository.update(messageId, {
+            status: message_entity_1.MessageStatus.READ,
+            isRead: true,
+            readAt: new Date(),
+        });
+        const message = await this.messageRepository.findOne({
+            where: { id: messageId },
+        });
+        if (!message)
+            throw new Error('Message not found');
+        return message;
+    }
     async createMessage(senderId, receiverId, content) {
-        const message = this.messageRepository.create({ senderId, receiverId, content });
-        return this.messageRepository.save(message);
+        try {
+            const message = this.messageRepository.create({
+                senderId,
+                receiverId,
+                content,
+                type: message_entity_1.MessageType.TEXT,
+                status: message_entity_1.MessageStatus.SENT,
+            });
+            return await this.messageRepository.save(message);
+        }
+        catch (error) {
+            throw error;
+        }
     }
     async getHistory(userId1, userId2, limit = 50, offset = 0) {
         return this.messageRepository
@@ -50,9 +82,6 @@ let MessagesService = class MessagesService {
             ],
             order: { createdAt: 'DESC' },
         });
-    }
-    async markAsRead(messageId) {
-        await this.messageRepository.update(messageId, { isRead: true });
     }
 };
 exports.MessagesService = MessagesService;

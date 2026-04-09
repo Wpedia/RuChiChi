@@ -1,48 +1,76 @@
 import { create } from "zustand";
-import type { Message, User } from "../types";
-import { useAuthStore } from "./authStore";
+import { createMessagesSlice, type MessagesSlice } from "./slices/messagesSlice";
+import { createUsersSlice, type UsersSlice } from "./slices/usersSlice";
+import { createUISlice, type UISlice } from "./slices/uiSlice";
 
-interface ChatState {
-  users: User[];                   
-  messages: Record<string, Message[]>; 
-  activeUserId: string | null;     
-  unreadCounts: Record<string, number>;
-  
-  setUsers: (users: User[]) => void;
-  setActiveUser: (id: string | null) => void;
-  addMessage: (msg: Message) => void;
-  setMessages: (userId: string, msgs: Message[]) => void;
-  setUnreadCount: (userId: string, count: number) => void;
+// Типы
+export type MessageStatus = "sent" | "delivered" | "read";
+export type MessageType = "text" | "image" | "voice";
+
+export interface Reaction {
+  emoji: string;
+  userId: string;
 }
 
-export const useChatStore = create<ChatState>((set, get) => ({
-  users: [],
-  messages: {},
-  activeUserId: null,
-  unreadCounts: {},
-  
-  setUsers: (users) => set({ users }),
-  
-  setActiveUser: (id) => set({ activeUserId: id }),
-  
-  addMessage: (msg) => {
-    const currentUserId = useAuthStore.getState().user?.id;
-    // Определяем с кем диалог (другой пользователь)
-    const otherId = msg.senderId === currentUserId ? msg.receiverId : msg.senderId;
-    
-    set((state) => ({
-      messages: {
-        ...state.messages,
-        [otherId]: [...(state.messages[otherId] || []), msg],
-      },
-    }));
-  },
-  
-  setMessages: (userId, msgs) => set((state) => ({
-    messages: { ...state.messages, [userId]: msgs },
-  })),
-  
-  setUnreadCount: (userId, count) => set((state) => ({
-    unreadCounts: { ...state.unreadCounts, [userId]: count },
-  })),
+export interface Message {
+  id: string;
+  senderId: string;
+  receiverId: string;
+  content: string;
+  status: MessageStatus;
+  isRead: boolean;
+  readAt?: string;
+  createdAt: string;
+  replyToMessageId?: string;
+  reactions?: Reaction[];
+  type?: MessageType;
+  attachmentUrl?: string;
+  attachmentName?: string;
+  voiceDuration?: number;
+}
+
+export interface User {
+  id: string;
+  phoneOrLogin: string;
+  firstName?: string;
+  isOnline?: boolean;
+  lastSeen?: number;
+}
+
+// Объединенный тип состояния
+type ChatStore = MessagesSlice & UsersSlice & UISlice;
+
+// Основной store
+export const useChatStore = create<ChatStore>()((...args) => ({
+  ...createMessagesSlice(...args),
+  ...createUsersSlice(...args),
+  ...createUISlice(...args),
+}));
+
+// Экспорты для удобного доступа к отдельным slices
+import { shallow } from 'zustand/shallow';
+
+export const useMessagesStore = () => useChatStore(
+  (state) => ({
+    messages: state.messages,
+    unreadCounts: state.unreadCounts,
+    messagesOffset: state.messagesOffset,
+    hasMoreMessages: state.hasMoreMessages,
+  }),
+  shallow
+);
+
+export const useUsersStore = () => useChatStore((state) => ({
+  users: state.users,
+  setUsers: state.setUsers,
+  updateUserStatus: state.updateUserStatus,
+}));
+
+export const useUIStore = () => useChatStore((state) => ({
+  activeUserId: state.activeUserId,
+  typingUsers: state.typingUsers,
+  setActiveUser: state.setActiveUser,
+  setTypingUsers: state.setTypingUsers,
+  addTypingUser: state.addTypingUser,
+  removeTypingUser: state.removeTypingUser,
 }));

@@ -12,13 +12,15 @@ const typeorm_1 = require("@nestjs/typeorm");
 const message_entity_1 = require("./message.entity");
 const messages_service_1 = require("./messages.service");
 const messages_gateway_1 = require("./messages.gateway");
+const redis_module_1 = require("../redis/redis.module");
+const users_status_service_1 = require("../users/users-status.service");
 let MessagesModule = class MessagesModule {
 };
 exports.MessagesModule = MessagesModule;
 exports.MessagesModule = MessagesModule = __decorate([
     (0, common_1.Module)({
-        imports: [typeorm_1.TypeOrmModule.forFeature([message_entity_1.Message])],
-        providers: [messages_service_1.MessagesService, messages_gateway_1.MessagesGateway],
+        imports: [typeorm_1.TypeOrmModule.forFeature([message_entity_1.Message]), redis_module_1.RedisModule],
+        providers: [messages_service_1.MessagesService, messages_gateway_1.MessagesGateway, users_status_service_1.UsersStatusService],
         exports: [messages_service_1.MessagesService],
     })
 ], MessagesModule);

@@ -36,6 +36,7 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 
 function App() {
   return (
+    <>
     <Routes>
       <Route path="/" element={<Layout />}>
         {/* Public routes */}
@@ -71,6 +72,7 @@ function App() {
         />
       </Route>
     </Routes>
+    </>
   );
 }
 
